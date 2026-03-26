@@ -48,11 +48,11 @@ Client → API Gateway → Microservices → Database
 
 
 
-\- API Gateway handles routing
+\- Eureka Server for service discovery
 
-\- Eureka handles service discovery
+\- API Gateway for routing
 
-\- Feign handles service communication
+\- Feign Client for inter-service communication
 
 
 
@@ -261,7 +261,7 @@ POST /orders
 
 \- API Gateway routing
 
-\- Feign client communication
+\- OpenFeign client communication
 
 \- Database per service
 
