@@ -2,9 +2,13 @@ package com.ecommerce.service;
 
 import com.ecommerce.client.ProductClient;
 import com.ecommerce.client.UserClient;
+import com.ecommerce.dto.User;
 import com.ecommerce.entity.Orders;
 import com.ecommerce.dto.Product;
+import com.ecommerce.exception.ProductNotFoundException;
+import com.ecommerce.exception.UserNotFoundException;
 import com.ecommerce.repository.OrderRepository;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +28,22 @@ public class OrderService {
 
         // Call User Service
         // validate user
-        userClient.getUserById(order.getUserId());
+        try {
+            userClient.getUserById(order.getUserId());
+        } catch (FeignException.NotFound exception) {
+            throw new UserNotFoundException("User not found with id " + order.getUserId());
+        }
 
         // Call Product Service
         // get product
-        Product product = productClient.getProductById(order.getProductId());
+        Product product;
+        try {
+            product = productClient.getProductById(order.getProductId());
+        } catch (FeignException.NotFound exception) {
+            throw new ProductNotFoundException("Product not found with id " + order.getProductId());
+        } catch (FeignException ex) {
+            throw new RuntimeException("Product service is unavailable");
+        }
 
         // calculate total
         order.setTotalPrice(product.getPrice() * order.getQuantity());
